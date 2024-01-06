@@ -21,7 +21,6 @@ const connection = mysql.createConnection({
     database: "ludo",
   });
 
-
   
   connection.connect((err) => {
     if (err) {
@@ -39,48 +38,105 @@ const io=new Server(server)
 let arr=[]
 let playingArray=[]
 
-io.on("connection",(socket)=>{
-
-    socket.on("find",(e)=>{
-
-        if(e.name!=null){
-
-            arr.push(e.name)
-            console.log(e.name)
-
-            
-            if(arr.length==2){
-                let p1obj={
-                    p1name:arr[0],
-                  
-                }
-                let p2obj={
-                    p2name:arr[1],
-              
-                }
-
-                let obj={
-                    p1:p1obj,
-                    p2:p2obj,
-                  
-                }
-                playingArray.push(obj)
-                console.log(playingArray)
-
-                arr.splice(0,2)
-
-                io.emit("find",{allPlayers:playingArray})
-
-            }
-
+io.on("connection", (socket) => {
+  socket.on("find", (e) => {
+      if (e.name != null) {
+        for(let i=0;i<arr.length;i++){
+          if(arr[i] != e.name){
+            arr.push(e.name);
+          }
         }
 
-    })
+          if (arr.length == 2) {
+              let p1obj = { p1name: arr[0] };
+              let p2obj = { p2name: arr[1] };
 
- 
+              let obj = { p1: p1obj, p2: p2obj };
+
+              playingArray.push(obj);
+              console.log(playingArray);
+
+              arr.splice(0, 2);
+
+              io.emit("find", { allPlayers: playingArray });
+              playingArray.splice(0, playingArray.length);
+          }
+
+      
+      }
+  });
+
+    // For three players
+    socket.on("findThreePlayers", (e) => {
+      if (e.name != null) {
+
+        for(let i=0;i<arr.length;i++){
+          if(arr[i] != e.name){
+            arr.push(e.name);
+          }
+        }
+     
+        // console.log(e.name);
+
+        if (arr.length == 3) {
+            let p1obj = { p1name: arr[0] };
+            let p2obj = { p2name: arr[1] };
+            let p3obj = { p3name: arr[2] };
+
+            let obj = { p1: p1obj, p2: p2obj, p3: p3obj };
+
+            playingArray.push(obj);
+            console.log(playingArray);
+
+            arr.splice(0, 3);
+
+            io.emit("find", { allPlayers: playingArray });
+            playingArray.splice(0, playingArray.length);
+        }
+
+    
+    }
+    });
+  
+    // For four players
+    socket.on("findFourPlayers", (e) => {
+      if (e.name != null) {
+        arr.push(e.name);
+        console.log(e.name);
+
+        if (arr.length == 4) {
+            let p1obj = { p1name: arr[0] };
+            let p2obj = { p2name: arr[1] };
+            let p3obj = { p3name: arr[2] };
+            let p4obj = { p4name: arr[3] };
+
+            let obj = { p1: p1obj, p2: p2obj, p3: p3obj, p4:p4obj };
+
+            playingArray.push(obj);
+            console.log(playingArray);
+
+            arr.splice(0, 4);
+
+            io.emit("find", { allPlayers: playingArray });
+            playingArray.splice(0, playingArray.length);
+        }
+
+    
+    }
+    });
 
 
-})
+    //turn
+
+    // socket.emit('assignRole', currentPlayer);
+
+    socket.on('makeMove', (data) => {
+      console.log(data)
+      // currentPlayer = currentPlayer === 'p1' ? 'p2' : 'p1';
+      // io.emit('updateState', currentPlayer);
+    });
+});
+
 
 
 
@@ -101,19 +157,35 @@ var sql = `INSERT INTO signup (uname, mobileNumber) VALUES ("${name}", "${phone}
 });
 
 app.get("/getUserData", (req, res) => {
+  console.log("104",req.query.userId)
    
     const userId = req.query.userId;
     console.log(userId)
-    const sql = 'SELECT uid, uname, mobileNumber, status FROM signup WHERE mobileNumber = ?';
-    connection.query(sql, [userId], function (err, result) {
+    const sql = `SELECT uid, uname, mobileNumber,status FROM signup WHERE mobileNumber = ? `;
+    connection.query(sql,[userId] ,function (err, result) {
       if (err) throw err;
       else{
-          console.log("record inserted");
+   
           return res.send(result)
       }
   
     });
   });
+
+  app.get("/verify", (req, res) => {
+   
+     
+      const userId = req.query.userId;
+
+      const sql = `SELECT uid, uname, mobileNumber,status FROM signup WHERE mobileNumber = ${userId} `;
+      connection.query(sql,function (err, result) {
+        if (err) throw err;
+        else{
+            return res.send(result)
+        }
+    
+      });
+    });
 
 
 
