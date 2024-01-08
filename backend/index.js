@@ -37,107 +37,107 @@ const io=new Server(server)
 
 let arr=[]
 let playingArray=[]
+let activePlayerIndex = null
+let rooms =[]
 
 io.on("connection", (socket) => {
-  socket.on("find", (e) => {
+
+  // console.log('Client connected:', socket.id);
+   socket.on("find", (e) => {
+
+
       if (e.name != null) {
-        for(let i=0;i<arr.length;i++){
-          if(arr[i] != e.name){
-            arr.push(e.name);
-          }
+        console.log(e.name)
+        arr.push(e.name); 
+       
+          // for(let i=0; i<arr.length;i++){
+        
+          //   if(arr[i] != e.name){  
+          //     arr.push(e.name);  
+          //   }
+          //   console.log(arr)
+          // }
         }
+       
+       
 
           if (arr.length == 2) {
-              let p1obj = { p1name: arr[0] };
-              let p2obj = { p2name: arr[1] };
-
+            console.log(arr)
+            let roomID = generateUniqueRoomID();
+              let p1obj = { p1name: arr[0], color:"blue", socketId: socket.id, roomID:roomID };
+              let p2obj = { p2name: arr[1], color:"yellow", socketId: socket.id,roomID: roomID };
               let obj = { p1: p1obj, p2: p2obj };
+              // let obj = { roomID, players: [p1obj, p2obj] };
 
               playingArray.push(obj);
+            rooms.push(obj)
               console.log(playingArray);
 
               arr.splice(0, 2);
 
-              io.emit("find", { allPlayers: playingArray });
+              io.emit("find", { allPlayers: playingArray, activePlayer: activePlayerIndex });
+             
               playingArray.splice(0, playingArray.length);
           }
 
       
-      }
-  });
+      
+   });
 
-    // For three players
-    socket.on("findThreePlayers", (e) => {
-      if (e.name != null) {
-
-        for(let i=0;i<arr.length;i++){
-          if(arr[i] != e.name){
-            arr.push(e.name);
-          }
-        }
-     
-        // console.log(e.name);
-
-        if (arr.length == 3) {
-            let p1obj = { p1name: arr[0] };
-            let p2obj = { p2name: arr[1] };
-            let p3obj = { p3name: arr[2] };
-
-            let obj = { p1: p1obj, p2: p2obj, p3: p3obj };
-
-            playingArray.push(obj);
-            console.log(playingArray);
-
-            arr.splice(0, 3);
-
-            io.emit("find", { allPlayers: playingArray });
-            playingArray.splice(0, playingArray.length);
-        }
-
+   socket.on('activePlayer',(e)=>{
+    console.log("78",e.number)
+    // console.log("78", rooms[0].p1.p1name)
+    if (e.number == rooms[0].p1.p1name) {
+      activePlayerIndex = 0;
+      } 
     
+      else {
+      activePlayerIndex = 1;
     }
-    });
+
+    console.log("97",activePlayerIndex)
+
+    // Emit the active player index to the frontend
+    io.emit('activePlayerIndex', {activePlayerIndex:activePlayerIndex});
   
-    // For four players
-    socket.on("findFourPlayers", (e) => {
-      if (e.name != null) {
-        arr.push(e.name);
-        console.log(e.name);
+   })
 
-        if (arr.length == 4) {
-            let p1obj = { p1name: arr[0] };
-            let p2obj = { p2name: arr[1] };
-            let p3obj = { p3name: arr[2] };
-            let p4obj = { p4name: arr[3] };
 
-            let obj = { p1: p1obj, p2: p2obj, p3: p3obj, p4:p4obj };
 
-            playingArray.push(obj);
-            console.log(playingArray);
 
-            arr.splice(0, 4);
+   
+    socket.on('rollDice', (activePlayer) => {
 
-            io.emit("find", { allPlayers: playingArray });
-            playingArray.splice(0, playingArray.length);
-        }
-
-    
-    }
+            const diceResult = Math.floor(Math.random() * 6) + 1;
+        io.emit('diceRolled', { result: diceResult, activePlayer: activePlayerIndex });
+   
+      // if (socket.id === playingArray[activePlayerIndex].p1.socketId || socket.id === playingArray[activePlayerIndex].p2.socketId) {
+      //   const diceResult = Math.floor(Math.random() * 6) + 1;
+      //   io.emit('diceRolled', { result: diceResult, activePlayer: activePlayerIndex });
+        
+      //   // Update the active player
+      //   activePlayerIndex = (activePlayerIndex + 1) % 2;
+  
+      //   // Emit the new active player index
+      //   io.emit('activePlayerChanged', activePlayerIndex);
+      // }
     });
 
 
-    //turn
-
-    // socket.emit('assignRole', currentPlayer);
-
-    socket.on('makeMove', (data) => {
-      console.log(data)
-      // currentPlayer = currentPlayer === 'p1' ? 'p2' : 'p1';
-      // io.emit('updateState', currentPlayer);
+    socket.on('updateGameState', (gameState) => {
+      console.log('Received updated gameState:', gameState);
+  
+      // Broadcast the received gameState to all connected players
+      io.emit('broadcastGameState', gameState);
     });
-});
+
+    socket.on('disconnect', () => {
+      // console.log('Client disconnected:', socket.id);
+    });
 
 
+  });
+ 
 
 
 app.post("/signup", (req, res) => {
@@ -210,8 +210,75 @@ app.get("/",(req,res)=>{
 })
 
 
+function generateUniqueRoomID() {
+
+  return Date.now().toString();
+}
+
+
 server.listen(port, () => {
     console.log("server is running on",port);
-  });
+});
 
 
+
+
+  
+    // For three players
+    // socket.on("findThreePlayers", (e) => {
+    //   if (e.name != null) {
+
+    //     for(let i=0;i<arr.length;i++){
+    //       if(arr[i] != e.name){
+    //         arr.push(e.name);
+    //       }
+    //     }
+     
+    //     // console.log(e.name);
+
+    //     if (arr.length == 3) {
+    //         let p1obj = { p1name: arr[0] };
+    //         let p2obj = { p2name: arr[1] };
+    //         let p3obj = { p3name: arr[2] };
+
+    //         let obj = { p1: p1obj, p2: p2obj, p3: p3obj };
+
+    //         playingArray.push(obj);
+    //         console.log(playingArray);
+
+    //         arr.splice(0, 3);
+
+    //         io.emit("find", { allPlayers: playingArray });
+    //         playingArray.splice(0, playingArray.length);
+    //     }
+
+    
+    // }
+    // });
+  
+    // For four players
+    // socket.on("findFourPlayers", (e) => {
+    //   if (e.name != null) {
+    //     arr.push(e.name);
+    //     console.log(e.name);
+
+    //     if (arr.length == 4) {
+    //         let p1obj = { p1name: arr[0] };
+    //         let p2obj = { p2name: arr[1] };
+    //         let p3obj = { p3name: arr[2] };
+    //         let p4obj = { p4name: arr[3] };
+
+    //         let obj = { p1: p1obj, p2: p2obj, p3: p3obj, p4:p4obj };
+
+    //         playingArray.push(obj);
+    //         console.log(playingArray);
+
+    //         arr.splice(0, 4);
+
+    //         io.emit("find", { allPlayers: playingArray });
+    //         playingArray.splice(0, playingArray.length);
+    //     }
+
+    
+    // }
+    // });
