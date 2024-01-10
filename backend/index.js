@@ -128,7 +128,7 @@ io.on("connection", (socket) => {
       console.log('Received updated gameState:', gameState);
   
       // Broadcast the received gameState to all connected players
-      io.emit('broadcastGameState', gameState);
+      io.emit('broadcastGameState',{gameState:gameState});
     });
 
     socket.on('disconnect', () => {
