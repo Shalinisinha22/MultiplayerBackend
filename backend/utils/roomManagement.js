@@ -8,12 +8,12 @@ function createRoom(data) {
   return room;
 }
 
-function joinRoom(data) {
+function joinRoom(data,socketId) {
   let roomToJoin = rooms.find((room) => !room.isFull());
   if (!roomToJoin) {
     roomToJoin = createRoom({ id: rooms.length + 1 }); // Generate room ID as needed
   }
-  roomToJoin.addUser(data.user);
+  roomToJoin.addUser(data.user,socketId);
   return roomToJoin;
 }
 
@@ -28,5 +28,6 @@ function leaveRoom(userId) {
     }
   }
 }
+
 
 module.exports = { createRoom, joinRoom, leaveRoom };
