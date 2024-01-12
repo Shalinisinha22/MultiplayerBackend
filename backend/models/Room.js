@@ -3,17 +3,18 @@ class Room {
       this.id = data.id;
       this.users = [];
       this.sockets=[];
-      this.timerData = {
-        BLUE: null,
-        YELLOW: null,
-        // Add timer data for other colors as needed
-      };
+      // this.timerData = {
+      //   BLUE: null,
+      //   YELLOW: null,
+      //   // Add timer data for other colors as needed
+      // };
  
       // Other properties as needed
     }
   
     isFull() {
-      return this.users.length == 2 ;
+
+      return this.users.length === 2 ;
     }
 
   
@@ -25,18 +26,18 @@ class Room {
 
             // Set timer data when a user joins
 
-            if(this.users.length == 1){
-              this.timerData[BLUE] = {
-                timerId: null,
-                remainingTime: 15000, // Initial time in milliseconds
-              };
-            }
-            else{
-              this.timerData[YELLOW] = {
-                timerId: null,
-                remainingTime: 15000, // Initial time in milliseconds
-              };
-            }
+            // if(this.users.length == 1){
+            //   this.timerData[BLUE] = {
+            //     timerId: null,
+            //     remainingTime: 15000, // Initial time in milliseconds
+            //   };
+            // }
+            // else{
+            //   this.timerData[YELLOW] = {
+            //     timerId: null,
+            //     remainingTime: 15000, // Initial time in milliseconds
+            //   };
+            // }
 
 
       // Handle logic when adding users to the room
@@ -54,7 +55,7 @@ class Room {
         this.sockets.splice(index, 1); 
 
               // Remove timer data when a user leaves
-      delete this.timerData[user.color];
+      // delete this.timerData[user.color];
         // Handle logic when removing users from the room
       }
     }

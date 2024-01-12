@@ -41,7 +41,7 @@ app.post("/signup", (req, res) => {
   var phone = req.body.phone;
 
 
-  var sql = `INSERT INTO signup (uname, mobileNumber) VALUES ("${name}", "${phone}")`
+  var sql = `INSERT INTO ludo (uname, mobileNumber) VALUES ("${name}", "${phone}")`
   connection.query(sql, function (err, result) {
     if (err) throw err;
     else {
@@ -57,7 +57,7 @@ app.get("/getUserData", (req, res) => {
 
   const userId = req.query.userId;
   console.log(userId)
-  const sql = `SELECT uid, uname, mobileNumber,status FROM signup WHERE mobileNumber = ? `;
+  const sql = `SELECT uid, uname, mobileNumber,status FROM ludo WHERE mobileNumber = ? `;
   connection.query(sql, [userId], function (err, result) {
     if (err) throw err;
     else {
@@ -73,7 +73,7 @@ app.get("/verify", (req, res) => {
 
   const userId = req.query.userId;
 
-  const sql = `SELECT uid, uname, mobileNumber,status FROM signup WHERE mobileNumber = ${userId} `;
+  const sql = `SELECT uid, uname, mobileNumber,status FROM ludo WHERE mobileNumber = ${userId} `;
   connection.query(sql, function (err, result) {
     if (err) throw err;
     else {
@@ -89,7 +89,7 @@ app.post("/changeStatus", (req, res) => {
 
   const userId = req.query.userId;
 
-  var sql = `INSERT INTO signup (status) VALUES ("active") WHERE mobileNumber = ?`;
+  var sql = `INSERT INTO ludo (status) VALUES ("active") WHERE mobileNumber = ?`;
   connection.query(sql, [userId], function (err, result) {
     if (err) throw err;
     else {

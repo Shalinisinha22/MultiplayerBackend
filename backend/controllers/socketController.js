@@ -20,7 +20,7 @@ function handleConnection(socket, io) {
       io.to(room.id).emit('startTwoPlayerGame', room);
       io.to(room.sockets[0]).emit('getTurn', true);
       io.to(room.sockets[1]).emit('getTurn', false);
-      startTurnTimer(room.sockets[0], room.sockets[1]); // Start timer for the first player
+      // startTurnTimer(room.sockets[0], room.sockets[1]); // Start timer for the first player
     }
 
     socket.on('updateGameState', (gameState) => {
@@ -31,7 +31,7 @@ function handleConnection(socket, io) {
       const { currentPlayer, nextPlayer, dicenumber, extrachance, bonusCount } = data;
       io.to(currentPlayer).emit('getTurn', false);
       io.to(nextPlayer).emit('getTurn', true);
-      startTurnTimer(nextPlayer, currentPlayer); // Start timer for the next player
+      // startTurnTimer(nextPlayer, currentPlayer); // Start timer for the next player
     });
 
  
